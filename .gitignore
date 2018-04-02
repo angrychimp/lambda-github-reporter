@@ -1,3 +1,17 @@
+## Project-specific ignored stuff
+
+# Required packages
+boto3*
+jinja2*
+requests*
+certifi*
+chardet*
+idna*
+markupsafe*
+urllib3*
+
+## Standard Python ignored stuff
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
