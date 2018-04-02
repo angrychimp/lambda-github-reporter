@@ -1,0 +1,275 @@
+To: {{ to_addr|join(', ') }}{% if cc_addr %}
+Cc: {{ cc_addr|join(', ') }}{% endif %}
+From: <{{ from_addr }}>
+Subject: Weekly Status Report, {{ report_date }}: {{ repo_name }}
+Content-Type: multipart/alternative; boundary="{{ mime_boundary }}"
+
+--{{ mime_boundary }}
+Content-Type: text/plain; charset="UTF-8"
+
+Summary for {{ repo_name }} team
+Activity since {{ start_date }}
+
+Current Tasking
+===============
+{% if assigned|length > 0 -%}
+{% for item in assigned -%}
+* "{{ item.title }}"
+    Link: {{ item.html_url }}{% if item.labels|length > 0 %}
+    Labels: {{ item.labels | join(', ', attribute='name')}}{% endif %}
+    Assigned to: {{ item.assignee.login }}
+
+{% endfor %}
+{% else -%}
+No issues current assigned
+
+
+{% endif -%}
+
+Opened Pull Requests
+====================
+{% if open_prs|length > 0 -%}
+{% for item in open_prs -%}
+{% if not item.merged_at -%}
+* "{{ item.title }}"
+    Link: {{ item.html_url }}{% if item.labels|length > 0 %}
+    Labels: {{ item.labels | join(', ', attribute='name')}}{% endif %}
+    Requested by: {{ item.user.login }}
+
+{% endif -%}
+{% endfor %}
+{% else -%}
+No recent requests
+
+
+{% endif -%}
+
+Merged Pull Requests
+====================
+{% if closed_prs|length > 0 -%}
+{% for item in closed_prs -%}
+{% if item.merged_at -%}
+* "{{ item.title }}"
+    Link: {{ item.html_url }}{% if item.labels|length > 0 %}
+    Labels: {{ item.labels | join(', ', attribute='name')}}{% endif %}
+    Requested by: {{ item.user.login }}
+
+{% endif -%}
+{% endfor %}
+{% else -%}
+No recent requests
+
+
+{% endif -%}
+
+Newly Opened Issues
+===================
+{% if recent|length > 0 -%}
+{% for item in recent -%}
+* "{{ item.title }}"
+    Link: {{ item.html_url }}
+    State: {{ item.state }}
+    Updated: {{ item.updated_at }}{% if item.labels|length > 0 %}
+    Labels: {{ item.labels | join(', ', attribute='name')}}{% endif %}{% if item.assignee %}
+    Assigned to: {{ item.assignee.login }}{% endif %}
+
+{% endfor %}
+{% else -%}
+No issues recently created
+
+
+{% endif -%}
+
+Closed/Resolved Issues
+======================
+{% if closed|length > 0 -%}
+{% for item in closed -%}
+* "{{ item.title }}"
+    Link: {{ item.html_url }}
+    Closed: {{ item.closed_at }}{% if item.labels|length > 0 %}
+    Labels: {{ item.labels | join(', ', attribute='name')}}{% endif %}{% if item.assignee %}
+    Assigned to: {{ item.assignee.login }}{% endif %}
+
+{% endfor %}
+{% else -%}
+No issues recently closed
+
+
+{% endif -%}
+
+Latest Release: {{ release.tag_name }}
+Download Link: {{ release.html_url }}
+
+
+--{{ mime_boundary }}
+Content-Type: text/html; charset="UTF-8"
+<html>
+<head>
+<style type="text/css">
+    #body {
+        font-family: Arial, Helvetica, sans-serif
+    }
+    .header {
+        margin-bottom: 0px;
+    }
+    .code {
+        font-family: "Courier New", Courier, mono
+    }
+    .item {
+        padding-bottom: 5px;
+    }
+    .issuelabel {
+        height: 20px;
+        padding: 0.15em 4px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 15px;
+        border-radius: 2px;
+        box-shadow: inset 0 -1px 0 rgba(27,31,35,0.12);
+        white-space: nowrap;
+    }
+    .itemtitle {
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .itemnumber {
+        font-weight: 300;
+        color: #a3aab1;
+        font-style: italic;
+    }
+    ol {
+        padding-left: 10px;
+    }
+</style>
+</head>
+<body>
+<div id="body">
+<p>
+<h2 class="header">Summary for <code class="code">{{ repo_name }}</code> team</h2>
+Activity since {{ start_date }}
+</p>
+<p>
+<h3 class="header">Current Tasking</h3>
+{% if assigned|length > 0 -%}
+<ol>
+{% for item in assigned -%}
+<li class="item">
+    <span class="itemtitle"><a href="{{ item.html_url }}">{{ item.title|e }}</a>
+    <label class="itemnumber">#{{ item.number }}</label></span>
+{%- if item.labels|length > 0 %}
+    <br/>Labels: {% for label in item.labels -%}<span class="issuelabel" style="color: #{{ label.color|contrast }}; background-color: #{{ label.color }}">{{ label.name }}</span> {% endfor %}
+{%- endif %}
+    <br/>Assigned to: {{ item.assignee.login }}
+</li><br/>
+{%- endfor %}
+</ol>
+{% else -%}
+<em>No issues current assigned</em>
+{% endif -%}
+</p>
+
+<p>
+<h3 class="header">Open Pull Requests</h3>
+{% if open_prs|length > 0 -%}
+<ol>
+{% for item in open_prs -%}
+{% if not item.merged_at -%}
+<li class="item">
+    <span class="itemtitle"><a href="{{ item.html_url }}">{{ item.title|e }}</a>
+    <label class="itemnumber">#{{ item.number }}</label></span>
+{%- if item.labels|length > 0 %}
+    <br/>Labels: {% for label in item.labels -%}<span class="issuelabel" style="color: #{{ label.color|contrast }}; background-color: #{{ label.color }}">{{ label.name }}</span> {% endfor %}
+{%- endif %}
+    <br/>Requested by: {{ item.user.login }}
+</li><br/>
+{%- endif %}
+{%- endfor %}
+</ol>
+{% else -%}
+<em>No recent requests</em>
+{% endif -%}
+</p>
+
+<p>
+<h3 class="header">Merged Pull Requests</h3>
+{% if closed_prs|length > 0 -%}
+<ol>
+{% for item in closed_prs -%}
+{% if item.merged_at -%}
+<li class="item">
+    <span class="itemtitle"><a href="{{ item.html_url }}">{{ item.title|e }}</a>
+    <label class="itemnumber">#{{ item.number }}</label></span>
+{%- if item.labels|length > 0 %}
+    <br/>Labels: {% for label in item.labels -%}<span class="issuelabel" style="color: #{{ label.color|contrast }}; background-color: #{{ label.color }}">{{ label.name }}</span> {% endfor %}
+{%- endif %}
+    <br/>Requested by: {{ item.user.login }}
+</li><br/>
+{%- endif %}
+{%- endfor %}
+</ol>
+{% else -%}
+<em>No recent requests</em>
+{% endif -%}
+</p>
+
+<p>
+<h3 class="header">Newly Opened Issues</h3>
+{% if recent|length > 0 -%}
+<ol>
+{% for item in recent -%}
+<li class="item">
+    <span class="itemtitle"><a href="{{ item.html_url }}">{{ item.title|e }}</a>
+    <label class="itemnumber">#{{ item.number }}</label></span><br/>
+    Updated: {{ item.updated_at }}
+{%- if item.labels|length > 0 %}
+    <br/>Labels: {% for label in item.labels -%}<span class="issuelabel" style="color: #{{ label.color|contrast }}; background-color: #{{ label.color }}">{{ label.name }}</span> {% endfor %}
+{%- endif %}
+{%- if item.assignee %}
+    <br/>Assigned to: {{ item.assignee.login }}
+{%- endif %}
+</li><br/>
+{% endfor %}
+</ol>
+{% else -%}
+<em>No issues recently created</em>
+{% endif -%}
+</p>
+
+<p>
+<h3 class="header">Closed/Resolved Issues</h3>
+{% if closed|length > 0 -%}
+<ol>
+{% for item in closed -%}
+<li class="item">
+    <span class="itemtitle"><a href="{{ item.html_url }}">{{ item.title|e }}</a>
+    <label class="itemnumber">#{{ item.number }}</label></span><br/>
+    Closed: {{ item.closed_at }}
+{%- if item.labels|length > 0 %}
+    <br/>Labels: {% for label in item.labels -%}<span class="issuelabel" style="color: #{{ label.color|contrast }}; background-color: #{{ label.color }}">{{ label.name }}</span> {% endfor %}
+{%- endif %}
+{%- if item.assignee %}
+    <br/>Assigned to: {{ item.assignee.login }}
+{%- endif %}
+</li><br/>
+{% endfor %}
+</ol>
+{% else -%}
+<em>No issues recently closed</em>
+{% endif -%}
+</p>
+
+<p>
+<h3 class="header">Latest Release Info</h3>
+{%- if release.id %}
+&gt; <a href="{{ release.html_url }}">{{ release.name }}</a><br/>
+<em>published {{ release.published_at }}</em>
+{% else %}
+<em>No releases have been built for this product</em>
+{%- endif %}
+</p>
+
+</div>
+</body>
+</html>
+
+--{{ mime_boundary }}--
